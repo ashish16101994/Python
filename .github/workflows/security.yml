@@ -2,33 +2,31 @@ name: Snyk Security Scan
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
+    branches: [ main ]
 
 jobs:
-  security:
+  snyk:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up Node.js (needed for snyk)
+        uses: actions/setup-node@v3
         with:
-          python-version: 3.9
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+          node-version: '18'
 
       - name: Install Snyk CLI
         run: npm install -g snyk
 
       - name: Authenticate Snyk
-        run: snyk auth
-        env:
-          SNYK_TOKEN: ${{ secrets.Snyk }}
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
-      - name: Run Snyk test
+      - name: Run Snyk Test
         run: snyk test
-        continue-on-error: true
+
+      - name: Monitor Project (push to Snyk dashboard)
+        run: snyk monitor
